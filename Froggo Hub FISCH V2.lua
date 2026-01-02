@@ -1,4 +1,4 @@
-﻿-- // LOAD LUNA INTERFACE SUITE
+-- // LOAD LUNA INTERFACE SUITE
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
 -- Create the main UI window
@@ -22,6 +22,8 @@ local flying = false
 local flySpeed = 50
 local autoTPRunning = false
 local autoTPIndex = 1
+local guiAlive = true
+local flyInputConnection
 
 -- Tabs
 Window:CreateHomeTab({SupportedExecutors = {}, DiscordInvite = "1234", Icon = 2, Whitelist = true})
@@ -259,6 +261,12 @@ MiscTab:CreateButton({
             end
             if hum then hum.PlatformStand=false end
         end
+        guiAlive = false
+
+        if flyInputConnection then
+            flyInputConnection:Disconnect()
+            flyInputConnection = nil
+        end
         pcall(function() Luna:Destroy() end)
     end
 })
@@ -267,6 +275,7 @@ MiscTab:CreateButton({
 -- FLY FUNCTION
 ----------------------
 function ToggleFly()
+    if not guiAlive then return end
     local char = Player.Character
     if not char then return end
     local root = char:FindFirstChild("HumanoidRootPart")
@@ -313,7 +322,8 @@ function ToggleFly()
 end
 
 -- Toggle fly with F key
-UserInputService.InputBegan:Connect(function(i)
+flyInputConnection = UserInputService.InputBegan:Connect(function(i, gp)
+    if gp or not guiAlive then return end
     if i.KeyCode == Enum.KeyCode.F then
         ToggleFly()
     end
